@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: springboot-interceptor
+Implementation-Version: 0.0.1
+Built-By: SUNDAR.G
+Implementation-Vendor-Id: com.test
+Build-Jdk: 1.8.0_121
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/springboot-interceptor
+Created-By: Maven Integration for Eclipse
+
