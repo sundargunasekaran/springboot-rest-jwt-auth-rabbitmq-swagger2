@@ -13,6 +13,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.test.example.config.TestConfigProperty;
 import com.test.example.model.EmployeeModel;
 import com.test.example.rabbitmq.TestRabbitMQPublisher;
 import com.test.example.service.TestDataService;
@@ -22,8 +23,9 @@ import com.test.example.service.TestEmailService;
 @Component
 public class ScheduledTasks {
 
-	@Value("${scheduling.job.cron}")
-	String cornJob;
+
+	@Autowired
+	private TestConfigProperty testConfigProperty;
 	
 	@Autowired
 	private TestRabbitMQPublisher testRabbitMqPublisher;
@@ -46,7 +48,7 @@ public class ScheduledTasks {
 	public void performTask() throws Exception {
 
 		System.out.println("Regular task performed at "
-				+ dateFormat.format(new Date())+"--"+cornJob);
+				+ dateFormat.format(new Date())+"--"+testConfigProperty.getCornJob());
 		try {
 			List<EmployeeModel>  bean = testDataService.getEmployeeInfo("3000");
 			if(bean.size() > 0){

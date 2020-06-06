@@ -30,17 +30,8 @@ public class TestServiceConfiguration {
 	 @Autowired
 	 private Environment environment;
 	 
-	 @Value("${email.host}")
-	 private String host;
-
-	 @Value("${email.port}")
-	 private Integer port;
-	    
-	 @Value("${email.username}")
-	 private String username;
-	
-	 @Value("${email.password}")
-	 private String password;
+	 @Autowired
+	 private TestConfigProperty testConfigProperty;
 	    
 	 @Autowired
 	 private TestDataService testDataService ;
@@ -80,10 +71,10 @@ public class TestServiceConfiguration {
     public JavaMailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
 
-        javaMailSender.setHost(host);
-        javaMailSender.setPort(port);
-        javaMailSender.setPassword(password);
-        javaMailSender.setUsername(username);
+        javaMailSender.setHost(testConfigProperty.getHost());
+        javaMailSender.setPort(testConfigProperty.getPort());
+        javaMailSender.setPassword(testConfigProperty.getPassword());
+        javaMailSender.setUsername(testConfigProperty.getUsername());
         javaMailSender.setJavaMailProperties(getMailProperties());
 
         return javaMailSender;

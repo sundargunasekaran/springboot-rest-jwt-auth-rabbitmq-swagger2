@@ -50,6 +50,15 @@ public class WebSecutityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	public void registerGlobalAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
 		authenticationManagerBuilder.authenticationProvider(authenticationProvider);
+		/*authenticationManagerBuilder.ldapAuthentication()
+			.userDnPatterns("uid={0},ou=people")
+			.groupSearchBase("ou=groups")
+			.contextSource()
+			.url("ldap://localhost:8080/dc=test,dc=com")
+			.and()
+		    .passwordCompare()
+		  	.passwordEncoder(passwordEncoder())
+			.passwordAttribute("userPassword");*/
 	}
 	
     /*@Override

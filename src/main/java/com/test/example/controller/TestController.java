@@ -30,8 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.test.example.model.AuthenticationModel;
 import com.test.example.model.EmployeeModel;
 import com.test.example.model.UserModel;
+import com.test.example.retryconfig.RetryService;
 import com.test.example.service.TestDataService;
 import com.test.example.service.UserDetailsServiceImpl;
+import com.test.example.utils.CookieUtils;
 import com.test.example.utils.JWTUtils;
 
 import io.swagger.annotations.*;
@@ -50,6 +52,9 @@ public class TestController {
 	
 	@Autowired
 	private JWTUtils jwtUtils;
+	
+	/*@Autowired
+    private RetryService retryService;*/
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -66,17 +71,20 @@ public class TestController {
 			@ApiResponse(code = 200, message = "Successful retrieval") })
 	@RequestMapping(method = RequestMethod.POST, value = "/signin", headers = "Accept= application/json", produces = "application/json")
 	public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationModel model) throws Exception {
-		System.out.println("--->login");		
+		String jwt = "";	
 		try {
 			Authentication authentication = authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(model.getUsername(), model.getPassword()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
+			//jwt = jwtUtils.generateTokenWithClaims(model.getUsername(),model.getPassword(), authentication.getAuthorities().toString().replaceAll("\\[|\\]", "").replaceAll(", ","\t"));
+			jwt = jwtUtils.generateToken(model.getUsername());
+			//CookieUtils.create(new HttpServletResponse(), jwtTokenCookieName, token, false, -1, "localhost");
 		}
 		catch (BadCredentialsException e) {
 			throw new Exception("Incorrect username or password", e);
 		}
 
-		final String jwt = jwtUtils.generateToken(model.getUsername());
+		
 		return ResponseEntity.ok(jwt);
 	}
 
@@ -166,5 +174,15 @@ public class TestController {
 	public ResponseEntity<?> sayHello(@ApiParam("Enter your message") @PathVariable(value = "msg", required = false) String msg) throws Exception {
 		return ResponseEntity.ok(msg);
 	}
+	
+/*	@RequestMapping(path ="/getData/{id}", method = RequestMethod.GET)
+    public Object getEmployee(@PathVariable("id") String id) throws Exception{
+            return retryTemplate.execute(new RetryCallback<Object, Exception>() {
+            @Override
+            public Object doWithRetry(RetryContext arg0) throws Exception{
+                Object o = restTutorialClient.getEmployeesList(id);
+                return o;
+            }
+        });*/
 
 }

@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.core.GrantedAuthority;
 
+import com.test.example.config.TestConfigProperty;
 import com.test.example.exceptions.CustomException;
 import com.test.example.model.UserModel;
 import com.test.example.service.TestDataService;
@@ -35,12 +38,8 @@ public class JWTUtils {
 	@Lazy
     private TestDataService testDataService;
 	
-
-    @Value("${jwt.expire.minutes}")
-    private Long expireDuration;
-
-    @Value("${jwt.token.secret}")
-    private String secretKey;
+	@Autowired
+	private TestConfigProperty testConfigProperty;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -52,10 +51,13 @@ public class JWTUtils {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
+        //System.out.println("role "+(String) claims.get("role"));
+       // System.out.println("pwd "+(String) claims.get("password"));
+        //String role = (String) claims.get("role");
         return claimsResolver.apply(claims);
     }
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(testConfigProperty.getSecretKey()).parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -66,11 +68,22 @@ public class JWTUtils {
         Map<String, Object> claims = new HashMap<>(); // <role,list<authorities>
         return createToken(claims, username);
     }
+    
+    public String generateTokenWithClaims(String username,String password,String roles) {
+        Map<String, Object> claims = new HashMap<>(); // <role,list<authorities>
+        if(claims.size() > 0 && claims.get("role") != null){
+        	 claims.put("role", roles);
+        }
+        if(claims.size() > 0 && claims.get("password") != null){
+        	claims.put("password", password);
+       }        
+        return createToken(claims, username);
+    }
 
     protected Date getExpirationTime()
     {
     	Date now = new Date();
-        Long expireInMilis = TimeUnit.MINUTES.toMillis(expireDuration);
+        Long expireInMilis = TimeUnit.MINUTES.toMillis(testConfigProperty.getExpireDuration());
         return new Date(expireInMilis + now.getTime());
     }
     
@@ -81,12 +94,18 @@ public class JWTUtils {
         		.setSubject(username)
         		.setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(getExpirationTime())
-                .signWith(SignatureAlgorithm.HS256, secretKey).compact();
+                .signWith(SignatureAlgorithm.HS256, testConfigProperty.getSecretKey()).compact();
     }
 
     public Boolean validateToken(String token, String username) {
         final String tkUsername = extractUsername(token);
         return (tkUsername.equals(username) && !isTokenExpired(token));
+    }
+    
+    public static String getSubject(HttpServletRequest httpServletRequest, String jwtTokenCookieName, String signingKey){
+        String token = CookieUtils.getValue(httpServletRequest, jwtTokenCookieName);
+        if(token == null) return null;
+        return Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody().getSubject();
     }
     
     public UsernamePasswordAuthenticationToken getAuthentication(String username) {

@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,28 +19,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TestServiceRabbitMQConfiguration {
 
-	@Value("${test.rabbitmq.queue}")
-	String queueName;
 
-	@Value("${test.rabbitmq.exchange}")
-	String exchange;
-
-	@Value("${test.rabbitmq.routingkey}")
-	private String routingkey;
+	
+	 @Autowired
+	 private TestConfigProperty testConfigProperty;
 
 	@Bean
 	Queue queue() {
-		return new Queue(queueName, false);
+		return new Queue(testConfigProperty.getQueueName(), false);
 	}
 
 	@Bean
 	DirectExchange exchange() {
-		return new DirectExchange(exchange);
+		return new DirectExchange(testConfigProperty.getExchange());
 	}
 
 	@Bean
 	Binding binding(Queue queue, DirectExchange exchange) {
-		return BindingBuilder.bind(queue).to(exchange).with(routingkey);
+		return BindingBuilder.bind(queue).to(exchange).with(testConfigProperty.getRoutingkey());
 	}
 
 	@Bean

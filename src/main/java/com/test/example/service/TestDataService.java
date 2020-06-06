@@ -1,11 +1,8 @@
 package com.test.example.service;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +13,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
-import com.test.example.controller.TestController;
 import com.test.example.model.EmployeeModel;
 import com.test.example.model.UserModel;
 
@@ -148,13 +143,9 @@ public class TestDataService extends JdbcDaoSupport{
 			    Map<String,String> qryMap = new LinkedHashMap<String,String>();
 		        ArrayList<String> paramList = new ArrayList<String>();
 		        if(userName != null && !userName.trim().equals("")){
-		        	//whereSql +=" lu.user_name = ? ";
-		        	//paramList.add(userName);
 		        	qryMap.put(" lu.user_name = ? ", userName);
 		        }
 		        if(password != null && !password.trim().equals("")){
-		        	//whereSql +=" and lu.password = ? ";
-		        	//paramList.add(password);
 		        	qryMap.put(" lu.password = ? ", password);
 		        }
 		        
